@@ -1,16 +1,17 @@
 import type { Request, Response } from 'express';
 import JobCard, { JobStatus } from '../models/JobCard.js';
 
-export const assignTechnician = async (req: Request, res: Response) => {
+export const assignTechnician = async (req: any, res: Response) => {
   try {
-    const { technicianID, foremanID } = req.body;
+    const { technicianId } = req.body;
+    const foremanId = req.user?.id;
     const job = await JobCard.findById(req.params.id);
 
     if (!job) return res.status(404).json({ message: 'Job Card not found' });
 
-    job.technician = technicianID;
-    job.foreman = foremanID;
-    job.status = JobStatus.ACTIVE; // Moves to ACTIVE once technician is assigned
+    job.technician = technicianId;
+    job.foreman = foremanId;
+    job.status = JobStatus.ACTIVE;
 
     await job.save();
 

@@ -7,7 +7,7 @@ export enum VehicleCategory {
 
 interface IVehicle extends Document {
   make: string;
-  model: string;
+  vehicleModel: string;
   plateNumber: string;
   vin: string;
   category: VehicleCategory;
@@ -18,7 +18,7 @@ interface IVehicle extends Document {
 
 const vehicleSchema = new Schema<IVehicle>({
   make: { type: String, required: true },
-  model: { type: String, required: true },
+  vehicleModel: { type: String, required: true },
   plateNumber: { type: String, required: true, unique: true },
   vin: { type: String, required: true, unique: true },
   category: { type: String, enum: Object.values(VehicleCategory), required: true },

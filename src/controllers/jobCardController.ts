@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 export const createVRS = async (req: Request, res: Response) => {
   try {
     const { 
-      make, model, plateNumber, vin, category, 
+      make, vehicleModel, plateNumber, vin, category, 
       customerName, customerEmail, customerPhone 
     } = req.body;
 
@@ -14,7 +14,7 @@ export const createVRS = async (req: Request, res: Response) => {
     let vehicle = await Vehicle.findOne({ plateNumber });
     if (!vehicle) {
       vehicle = new Vehicle({
-        make, model, plateNumber, vin, category,
+        make, vehicleModel, plateNumber, vin, category,
         customerName, customerEmail, customerPhone
       });
       await vehicle.save();
@@ -45,10 +45,27 @@ export const createVRS = async (req: Request, res: Response) => {
 
 export const getAllJobs = async (req: Request, res: Response) => {
   try {
-    const jobs = await JobCard.find().populate('vehicle').sort({ createdAt: -1 });
+    const { status } = req.query;
+    const filter = status ? { status } : {};
+    const jobs = await JobCard.find(filter).populate('vehicle').sort({ createdAt: -1 });
     res.json(jobs);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching jobs', error });
+  }
+};
+
+export const getMyTasks = async (req: any, res: Response) => {
+  try {
+    const technicianId = req.user?.id;
+    if (!technicianId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const jobs = await JobCard.find({ technician: technicianId })
+      .populate('vehicle')
+      .sort({ updatedAt: -1 });
+      
+    res.json(jobs);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching technician tasks', error });
   }
 };
 
@@ -69,10 +86,15 @@ export const getJobDetails = async (req: Request, res: Response) => {
 
 export const updateJobStatus = async (req: Request, res: Response) => {
   try {
-    const { status } = req.body;
+    const { status, notes, findings } = req.body;
+    const update: any = {};
+    if (status) update.status = status;
+    if (notes) update.repairNotes = notes;
+    if (findings) update.findings = findings;
+
     const job = await JobCard.findByIdAndUpdate(
       req.params.id,
-      { status },
+      update,
       { new: true }
     );
     if (!job) return res.status(404).json({ message: 'Job Card not found' });

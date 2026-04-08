@@ -20,6 +20,8 @@ interface IJobCard extends Document {
   totalPartsCost: number;
   totalLaborCost: number;
   customerAttachments: string[]; // PDFs/Images
+  findings: string;
+  repairNotes: string;
   isVRSComplete: boolean;
   isQCComplete: boolean;
 }
@@ -39,6 +41,8 @@ const jobCardSchema = new Schema<IJobCard>({
   totalPartsCost: { type: Number, default: 0 },
   totalLaborCost: { type: Number, default: 0 },
   customerAttachments: [{ type: String }],
+  findings: { type: String, default: "" },
+  repairNotes: { type: String, default: "" },
   isVRSComplete: { type: Boolean, default: false },
   isQCComplete: { type: Boolean, default: false }
 }, {
